@@ -1,50 +1,70 @@
-angular.module('todoController', [])
+angular.module('scheduleController', [])
 
-	// inject the Todo service factory into our controller
-	.controller('mainController', ['$scope','$http','Todos', function($scope, $http, Todos) {
+	// inject the Schedule service factory into our controller
+	.controller('mainController', ['$scope','$http','Schedules','$filter', function($scope, $http, Schedules, $filter) {
 		$scope.formData = {};
 		$scope.loading = true;
 
 		// GET =====================================================================
-		// when landing on the page, get all todos and show them
-		// use the service to get all the todos
-		Todos.get()
+		// when landing on the page, get all schedules and show them
+		// use the service to get all the schedules
+		Schedules.get()
 			.success(function(data) {
-				$scope.todos = data;
+				data.sort(function(a,b){
+					return new Date(a.date) - new Date(b.date);
+				})
+				$scope.schedules = data;
 				$scope.loading = false;
 			});
 
+		$scope.formData.date = $filter("date")(Date.now(), 'yyyy-MM-dd');
+
 		// CREATE ==================================================================
 		// when submitting the add form, send the text to the node API
-		$scope.createTodo = function() {
+		$scope.createSchedule = function() {
 
 			// validate the formData to make sure that something is there
 			// if form is empty, nothing will happen
-			if ($scope.formData.text != undefined) {
+			console.log($scope.formData, 'formdata');
+
+			if (($scope.formData.start && $scope.formData.end) != undefined) {
 				$scope.loading = true;
 
 				// call the create function from our service (returns a promise object)
-				Todos.create($scope.formData)
+				Schedules.create($scope.formData)
 
-					// if successful creation, call our get function to get all the new todos
+					// if successful creation, call our get function to get all the new schedules
 					.success(function(data) {
+
 						$scope.loading = false;
 						$scope.formData = {}; // clear the form so our user is ready to enter another
-						$scope.todos = data; // assign our new list of todos
+						$scope.schedules = data; // assign our new list of schedules
 					});
 			}
 		};
 
-		// DELETE ==================================================================
-		// delete a todo after checking it
-		$scope.deleteTodo = function(id) {
+		// UPDATE ==================================================================
+		// update a schedule after checking it
+		$scope.updateSchedule = function(id) {
 			$scope.loading = true;
 
-			Todos.delete(id)
-				// if successful creation, call our get function to get all the new todos
+			Schedules.update(id)
+				// if successful creation, call our get function to get all the new schedules
 				.success(function(data) {
 					$scope.loading = false;
-					$scope.todos = data; // assign our new list of todos
+					$scope.schedules = data; // assign our new list of schedules
+				});
+		};
+
+		// DELETE ==================================================================
+		// delete a schedule after checking it
+		$scope.deleteSchedule = function(id) {
+			$scope.loading = true;
+			Schedules.delete(id)
+				// if successful creation, call our get function to get all the new schedules
+				.success(function(data) {
+					$scope.loading = false;
+					$scope.schedules = data; // assign our new list of schedules
 				});
 		};
 	}]);

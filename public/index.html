@@ -1,13 +1,13 @@
 <!doctype html>
 
 <!-- ASSIGN OUR ANGULAR MODULE -->
-<html ng-app="scotchTodo">
+<html ng-app="scheduler">
 <head>
 	<!-- META -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1"><!-- Optimize mobile viewport -->
 
-	<title>Node/Angular Todo App</title>
+	<title>Node/Angular Conference Scheduler App</title>
 
 	<!-- SCROLLS -->
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"><!-- load bootstrap -->
@@ -15,15 +15,68 @@
 	<style>
 		html 					{ overflow-y:scroll; }
 		body 					{ padding-top:50px; }
-		#todo-list 				{ margin-bottom:30px; }
-		#todo-form 	 			{ margin-bottom:50px; }
+		#schedule-list 			{ margin-bottom:30px; }
+		#schedule-form 	 		{ margin-bottom:50px; }
+		table {
+		  background: white;
+		  margin-bottom: 1.25rem;
+		  border: solid 1px #dddddd;
+		  table-layout: auto; }
+		  table caption {
+		    background: transparent;
+		    color: #222222;
+		    font-size: 1rem;
+		    font-weight: bold; }
+		  table thead {
+		    background: whitesmoke; }
+		    table thead tr th,
+		    table thead tr td {
+		      padding: 0.5rem 0.625rem 0.625rem;
+		      font-size: 1.875rem;
+		      font-weight: bold;
+		      color: #222222; }
+		  table tfoot {
+		    background: whitesmoke; }
+		    table tfoot tr th,
+		    table tfoot tr td {
+		      padding: 0.5rem 0.625rem 0.625rem;
+		      font-size: 0.875rem;
+		      font-weight: bold;
+		      color: #222222; }
+		  table tr th,
+		  table tr td {
+		    padding: 0.5625rem 0.625rem;
+		    font-size: 1.875rem;
+		    color: #222222;
+		    text-align: left; }
+		  table tr.even, table tr.alt, table tr:nth-of-type(even) {
+		    background: #f9f9f9; }
+		  table thead tr th,
+		  table tfoot tr th,
+		  table tfoot tr td,
+		  table tbody tr th,
+		  table tbody tr td,
+		  table tr td {
+		    display: table-cell;
+		    line-height: 4.125rem; }
+		  input {
+		  	display: inline;
+		  	float: left;
+		  }
+		  input {
+		  	width: 20% !important;
+		  	margin-right: 1%;
+		  }
+		  .btn-lg {
+		  	padding: 10px 58px !important;
+		  }
 	</style>
 
 	<!-- SPELLS -->
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script><!-- load angular -->
 
 	<script src="js/controllers/main.js"></script> <!-- load up our controller -->
-	<script src="js/services/todos.js"></script> <!-- load our todo service -->
+	<script src="js/services/schedules.js"></script> <!-- load our schedule service -->
 	<script src="js/core.js"></script> <!-- load our main application -->
 
 </head>
@@ -31,23 +84,45 @@
 <body ng-controller="mainController">
 	<div class="container">
 
-		<!-- HEADER AND TODO COUNT -->
+		<!-- HEADER AND SCHEDULE COUNT -->
 		<div class="jumbotron text-center">
-			<h1>I'm a Todo-aholic <span class="label label-info">{{ todos.length }}</span></h1>
+			<h1>Conference Room</h1>
+			<h2>Activities reserved: <span class="label label-info">{{ schedules.length }}</span></h1>
 		</div>
 
-		<!-- TODO LIST -->
-		<div id="todo-list" class="row">
-			<div class="col-sm-4 col-sm-offset-4">
+		<!-- SCHEDULE LIST -->
+		<div id="schedule-list" class="row">
+			<div class="col-sm-10 col-sm-offset-1">
 
 				
-
-				<!-- LOOP OVER THE TODOS IN $scope.todos -->
-				<div class="checkbox" ng-repeat="todo in todos">
-					<label>
-						<input type="checkbox" ng-click="deleteTodo(todo._id)"> {{ todo.text }}
-					</label>
+				<!-- LOOP OVER THE SCHEDULES IN $scope.schedules -->
+				<div>
+					<table style="width: 100%;">
+						<thead>
+							<tr>
+								<th width='50'></th>
+								<th>Date</th>
+								<th>Start</th>
+								<th>End</th>
+								<th>Activity</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="schedule in schedules">
+								<td>{{$index+1}}</td>
+								<td>{{schedule.date | date:'fullDate'}}</td>
+								<td>{{schedule.start}}</td>
+								<td>{{schedule.end}}</td>
+								<td>{{schedule.activity}}</td>
+								<td>
+									<!-- <a ng-click="updateSchedule(schedule._id)">Edit</a> | -->
+									<a ng-click="deleteSchedule(schedule._id)">Delete</a>
+							</tr>
+						</tbody>
+				</table>
 				</div>
+				
 
 				<p class="text-center" ng-show="loading">
 					<span class="fa fa-spinner fa-spin fa-3x"></span>
@@ -56,25 +131,25 @@
 			</div>
 		</div>
 
-		<!-- FORM TO CREATE TODOS -->
-		<div id="todo-form" class="row">
-			<div class="col-sm-8 col-sm-offset-2 text-center">
+		<!-- FORM TO CREATE SCHEDULES -->
+		<div id="schedule-form" class="row">
+			<div class="col-sm-10 col-sm-offset-1 text-center">
 				<form>
 					<div class="form-group">
-
 						<!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
-						<input type="text" class="form-control input-lg text-center" placeholder="I want to buy a puppy that will love me forever" ng-model="formData.text">
+						<input type="date" class="form-control input-lg text-center" placeholder="Date" ng-model="formData.date" value={{formData.date}}>
+						<!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
+						<input type="text" class="form-control input-lg text-center " placeholder="Start" ng-model="formData.start">
+						<!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
+						<input type="text" class="form-control input-lg text-center " placeholder="End" ng-model="formData.end">
+						<!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
+						<input type="text" class="form-control input-lg text-center" placeholder="Activity" ng-model="formData.activity">
 					</div>
 
-					<!-- createToDo() WILL CREATE NEW TODOS -->
-					<button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
+					<!-- createSchedule() WILL CREATE NEW SCHEDULES -->
+					<button type="submit" class="btn btn-primary btn-lg" ng-click="createSchedule()">Add</button>
 				</form>
 			</div>
-		</div>
-
-		<div class="text-center text-muted">
-			<p>A demo by <a href="http://scotch.io">Scotch</a>.</p>
-			<p>Read the <a href="http://scotch.io/tutorials/javascript/creating-a-single-page-todo-app-with-node-and-angular">tutorial</a>.</p>
 		</div>
 
 	</div>

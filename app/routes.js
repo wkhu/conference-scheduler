@@ -1,52 +1,66 @@
-var Todo = require('./models/todo');
+var Schedule = require('./models/schedule');
 
-function getTodos(res){
-	Todo.find(function(err, todos) {
+function getSchedules(res){
+	Schedule.find(function(err, schedules) {
 
 			// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 			if (err)
 				res.send(err)
 
-			res.json(todos); // return all todos in JSON format
+			res.json(schedules); // return all todos in JSON format
 		});
 };
 
 module.exports = function(app) {
 
 	// api ---------------------------------------------------------------------
-	// get all todos
-	app.get('/api/todos', function(req, res) {
+	// get all schedules
+	app.get('/api/schedules', function(req, res) {
 
-		// use mongoose to get all todos in the database
-		getTodos(res);
+		// use mongoose to get all schedules in the database
+		getSchedules(res);
 	});
 
-	// create todo and send back all todos after creation
-	app.post('/api/todos', function(req, res) {
+	// create schedule and send back all schedules after creation
+	app.post('/api/schedules', function(req, res) {
 
-		// create a todo, information comes from AJAX request from Angular
-		Todo.create({
-			text : req.body.text,
-			done : false
+		// create a schedule, information comes from AJAX request from Angular
+		Schedule.create({
+			date : req.body.date,
+			start : req.body.start,
+			end : req.body.end,
+			activity : req.body.activity
 		}, function(err, todo) {
 			if (err)
 				res.send(err);
 
-			// get and return all the todos after you create another
-			getTodos(res);
+			// get and return all the schedules after you create another
+			getSchedules(res);
 		});
 
 	});
 
-	// delete a todo
-	app.delete('/api/todos/:todo_id', function(req, res) {
-		Todo.remove({
-			_id : req.params.todo_id
-		}, function(err, todo) {
+	// update a schedule
+	app.put('/api/schedules/:schedule_id', function(req, res) {
+		Schedule.update({
+			_id : req.params.schedule_id,
+		}, req.body, function(err, schedule) {
 			if (err)
 				res.send(err);
 
-			getTodos(res);
+			getSchedules(res);
+		});
+	});
+
+	// delete a schedule
+	app.delete('/api/schedules/:schedule_id', function(req, res) {
+		Schedule.remove({
+			_id : req.params.schedule_id
+		}, function(err, schedule) {
+			if (err)
+				res.send(err);
+
+			getSchedules(res);
 		});
 	});
 
