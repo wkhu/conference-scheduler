@@ -5,14 +5,18 @@ angular.module('scheduleController', [])
 		$scope.formData = {};
 		$scope.loading = true;
 
+		function activitySort(data) {
+			data.sort(function(a,b){
+				return new Date(a.date) - new Date(b.date);
+			})
+		}
+
 		// GET =====================================================================
 		// when landing on the page, get all schedules and show them
 		// use the service to get all the schedules
 		Schedules.get()
 			.success(function(data) {
-				data.sort(function(a,b){
-					return new Date(a.date) - new Date(b.date);
-				})
+				activitySort(data);
 				$scope.schedules = data;
 				$scope.loading = false;
 			});
@@ -35,12 +39,26 @@ angular.module('scheduleController', [])
 
 					// if successful creation, call our get function to get all the new schedules
 					.success(function(data) {
-
+						activitySort(data);
 						$scope.loading = false;
 						$scope.formData = {}; // clear the form so our user is ready to enter another
 						$scope.schedules = data; // assign our new list of schedules
 					});
 			}
+		};
+
+		// SHOW ==================================================================
+		// show a schedule after checking it
+		$scope.showSchedule = function(id) {
+			$scope.loading = true;
+
+			Schedules.get(id)
+				// if successful creation, call our get function to get all the new schedules
+				.success(function(data) {
+					activitySort(data);
+					$scope.loading = false;
+					$scope.schedules = data; // assign our new list of schedules
+				});
 		};
 
 		// UPDATE ==================================================================
@@ -51,6 +69,7 @@ angular.module('scheduleController', [])
 			Schedules.update(id)
 				// if successful creation, call our get function to get all the new schedules
 				.success(function(data) {
+					activitySort(data);
 					$scope.loading = false;
 					$scope.schedules = data; // assign our new list of schedules
 				});
@@ -63,6 +82,7 @@ angular.module('scheduleController', [])
 			Schedules.delete(id)
 				// if successful creation, call our get function to get all the new schedules
 				.success(function(data) {
+					activitySort(data);
 					$scope.loading = false;
 					$scope.schedules = data; // assign our new list of schedules
 				});

@@ -68,4 +68,19 @@ module.exports = function(app) {
 	app.get('*', function(req, res) {
 		res.sendfile('./public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
 	});
+
+	// application -------------------------------------------------------------
+	app.get('/api/schedule/:schedule_id', function(req, res) {
+		console.log(req,'req')
+		Schedule.findOne({
+			_id : req.params.schedule_id
+		}, function(err, schedule) {
+
+			// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+			if (err)
+				res.send(err)
+
+			res.json(schedule); // return all todos in JSON format
+		});
+	});
 };
